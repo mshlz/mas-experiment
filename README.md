@@ -18,6 +18,18 @@ scripts/install.sh
 
 ## cleanup
 ```bash
-# clean project
-scripts/cleanup.sh
+# remove build / logs etc
+scripts/clean.sh
+
+# remove node_modules, containers etc
+scripts/prune.sh
+```
+
+## containers
+```bash
+# create/start
+scripts/start.sh
+
+# stop/remove
+scripts/stop.sh
 ```

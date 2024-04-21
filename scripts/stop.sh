@@ -3,4 +3,5 @@ cd $(dirname $(readlink -f $0))
 cd ..
 WORKSPACE=$(pwd)
 
-rm -rf $WORKSPACE/{,pkgs/app}/{.yarn,node_modules,build,*.log}
+docker rm -f mas-app mas-redis
+docker network rm -f mas-net

@@ -4,13 +4,27 @@ import cors from "cors"
 import ms from "ms"
 import * as pkg from "../package.json"
 
+import { Redis } from "ioredis"
+
 const app = express()
 const server = http.createServer(app)
+
+const redis = new Redis("mas-redis")
 
 app.use(cors())
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", commit: pkg.commit })
+})
+
+app.get("/redis", (req, res) => {
+  redis.incr("counter", (err, count) => {
+    if (err) {
+      res.status(400).json({ message: err.message })
+    } else {
+      res.json({ counter: count })
+    }
+  })
 })
 
 app.all<any, any>("/wait", (req, res) => {
@@ -83,7 +97,7 @@ process.on("SIGTERM", () => {
     console.log("Connections: %s | Callbacks: %d", count, onFinishResponseCbs.length)
   })
   clearInterval(keepAliveTimer)
-  closeServer(err => { 
+  closeServer(err => {
     console.log("[SERVER EXITING]")
     if (err && err.code !== "ERR_SERVER_NOT_RUNNING") {
       console.error(err)
@@ -95,4 +109,3 @@ process.on("SIGTERM", () => {
 })
 
 startServer()
-
