@@ -7,4 +7,4 @@ WORKSPACE=$(pwd)
 yarn
 
 # install app package.json
-yarn --cwd $WORKSPACE/app install
+yarn --cwd $WORKSPACE/pkgs/app install

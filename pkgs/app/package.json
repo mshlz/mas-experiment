@@ -5,7 +5,8 @@
   "author": "mshlz",
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "build": "tsc"
   },
   "volta": {
     "node": "20.12.2",

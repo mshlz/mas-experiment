@@ -35,7 +35,11 @@ app.all<any, any>("/wait-close", (req, res) => {
 
 console.log("PID =>", process.pid)
 
-const keepAliveTimer = setInterval(() => {}, 1000)
+const keepAliveTimer = setInterval(() => {
+  // server.getConnections((err, count) => {
+  //   console.log("Connections: %d", count, err ?? "")
+  // })
+}, 1000)
 
 const startServer = () => {
   const PORT = process.env.PORT || 3001
@@ -43,8 +47,14 @@ const startServer = () => {
 }
 
 const closeServer = (cb?: (err?: any) => void) => {
-  server.close(cb)
-  onFinishResponseCbs.forEach(cb => cb())
+  if (server.listening) {
+    server.close(cb)
+
+    let finishCb = null
+    while ((finishCb = onFinishResponseCbs.pop())) {
+      finishCb()
+    }
+  }
 }
 
 server.on("close", () => {
@@ -69,8 +79,12 @@ process.on("SIGHUP", () => {
 
 process.on("SIGTERM", () => {
   console.log("Server received SIGTERM...")
+  server.getConnections((err, count) => {
+    console.log("Connections: %s | Callbacks: %d", count, onFinishResponseCbs.length)
+  })
   clearInterval(keepAliveTimer)
-  closeServer(err => {
+  closeServer(err => { 
+    console.log("[SERVER EXITING]")
     if (err && err.code !== "ERR_SERVER_NOT_RUNNING") {
       console.error(err)
       process.exit(1)
@@ -81,3 +95,4 @@ process.on("SIGTERM", () => {
 })
 
 startServer()
+
