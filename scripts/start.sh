@@ -30,17 +30,30 @@ if [ "$(docker images -f reference=$APP_NAME -q)" = "" ]; then
   ./scripts/app/docker_build_image.sh
 fi
 
-if [ "$(docker ps -af name=$APP_NAME -q)" = "" ]; then
-  echo "creating app $APP_NAME..."
-  docker run -d --net $NET_NAME --net-alias $APP_NAME --hostname $APP_NAME --name $APP_NAME $APP_NAME
-elif [ "$(docker ps -f name=$APP_NAME -q)" = "" ]; then
-  echo "starting app $APP_NAME..."
-  docker start $APP_NAME
-fi
+function spinAppInstance {
+  if [ "$1" = "" ]; then
+    local uniq="`date +%Y%m%d_%H%M%S`_`printf %.6s $RANDOM$RANDOM$RANDOM`"
+  else
+    local uniq=$1
+  fi
+  local name=${APP_NAME}_${uniq}
+  if [ "$(docker ps -af name=$name -q)" = "" ]; then
+    echo "creating app $name..."
+    docker run -d --net $NET_NAME --net-alias $APP_NAME --hostname $name --rm --name $name $APP_NAME
+  elif [ "$(docker ps -f name=$APP_NAME -q)" = "" ]; then
+    echo "starting app $APP_NAME..."
+    docker start $APP_NAME
+  fi
+}
+
+spinAppInstance 1
+# spinAppInstance 2 # run more instances, then check dns: docker exec mas-app_1 dig mas-app
+# spinAppInstance 3
+
 
 # check nginx lb
 if [ "$(docker ps -af name=$LB_NAME -q)" = "" ]; then
-  echo "creating app $LB_NAME..."
+  echo "creating lb $LB_NAME..."
   docker run -d --net $NET_NAME --name $LB_NAME --publish $LB_PORT:80 -v ./pkgs/lb/nginx/config/proxy.conf:/etc/nginx/nginx.conf -v ./pkgs/lb/nginx/logs:/var/log/nginx/ nginx:latest
 elif [ "$(docker ps -f name=$LB_NAME -q)" = "" ]; then
   echo "starting lb $LB_NAME..."

@@ -6,7 +6,7 @@ ENV TZ Etc/UTC
 WORKDIR /var/app
 EXPOSE 3001
 
-RUN apt update && apt install -y vim curl socat wget htop mtr git openssh-server net-tools sudo lsof
+RUN apt update && apt install -y vim curl socat wget htop mtr git openssh-server net-tools dnsutils sudo lsof
 # ENV BASH_ENV ~/.bashrc
 ENV VOLTA_HOME /root/.volta
 ENV PATH $VOLTA_HOME/bin:$PATH
